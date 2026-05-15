@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }} × Bridgetown ${{ matrix.bridgetown }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+        bridgetown: ["~> 2.0"]
+        include:
+          - ruby: "3.4"
+            bridgetown: "edge"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install libvips with HEIF/AVIF support
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips libvips-tools libheif1 libheif-dev libheif-plugin-aomenc libheif-plugin-libde265
+          vips --vips-config | tr ',' '\n' | grep -i heif || (echo "libvips missing HEIF support" && exit 1)
+          vips black /tmp/_avif_check.avif 16 16 && rm /tmp/_avif_check.avif || (echo "libvips cannot encode AVIF" && exit 1)
+
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: false
+
+      - name: Override Bridgetown constraint for matrix
+        if: matrix.bridgetown == 'edge'
+        run: |
+          echo "gem 'bridgetown', github: 'bridgetownrb/bridgetown', branch: 'main'" >> Gemfile
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Run tests
+        run: bundle exec rake test
+
+      - name: Run linter
+        if: matrix.ruby == '3.4' && matrix.bridgetown == '~> 2.0'
+        run: bundle exec rake rubocop
