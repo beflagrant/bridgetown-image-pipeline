@@ -186,7 +186,7 @@ All options, with defaults:
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `source_globs` | `["src/images/**/*.{jpg,jpeg,png}"]` | What to process |
+| `source_globs` | `["src/images/**/*.{jpg,jpeg,png}"]` | What to process. **Must live under `src/`** — public URLs are derived by stripping the `src/` prefix, so `src/images/foo.jpg` becomes `/images/foo.jpg` in `picture_tag` lookups. Sources outside `src/` are processed but unreachable from templates. |
 | `exclude` | `[]` | Glob patterns to skip |
 | `widths` | `[400, 600, 800, 1200, 1600]` | Derivative widths |
 | `formats` | `[:avif, :webp]` | Output formats (plus original) |

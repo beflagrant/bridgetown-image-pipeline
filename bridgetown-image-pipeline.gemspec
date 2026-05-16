@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Jim Remsik"]
   spec.email = ["jim@beflagrant.com"]
 
-  spec.summary = "Build-time AVIF/WebP derivatives plus picture_tag and bg_image_block helpers for Bridgetown."
+  spec.summary = "Build-time AVIF/WebP image derivatives and helpers for Bridgetown."
   spec.description = <<~DESC
     A Bridgetown 2.0+ plugin that pre-generates responsive AVIF and WebP image
     derivatives at multiple widths, exposes a picture_tag helper for <img>
@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
   spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
   spec.metadata["rubygems_mfa_required"] = "true"
