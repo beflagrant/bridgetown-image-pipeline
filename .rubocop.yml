@@ -43,3 +43,7 @@ Layout/LineLength:
 
 Metrics/ParameterLists:
   Max: 6
+
+Naming/FileName:
+  Exclude:
+    - "lib/bridgetown-image-pipeline.rb"
