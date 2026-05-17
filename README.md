@@ -4,7 +4,7 @@ A Bridgetown 2.0+ plugin that pre-generates responsive **AVIF** and **WebP**
 image derivatives at multiple widths, plus ERB helpers for `<picture>`
 elements and CSS `image-set()` backgrounds.
 
-Used in production at [rubyconf.org](https://rubyconf.org) — homepage mobile
+Used in production on a Bridgetown 2.x conference site — homepage mobile
 Lighthouse perf score went from **0.47 → 0.93** after the bg-image migration.
 
 ## Features
@@ -258,6 +258,6 @@ MIT — see [`LICENSE.txt`](LICENSE.txt).
 
 ## Status
 
-Maintained by [Flagrant](https://beflagrant.com) for use in production at
-[rubyconf.org](https://rubyconf.org). No SLA. Issues and PRs welcome at
+Maintained by [Flagrant](https://beflagrant.com). No SLA. Issues and PRs
+welcome at
 [github.com/beflagrant/bridgetown-image-pipeline](https://github.com/beflagrant/bridgetown-image-pipeline).
