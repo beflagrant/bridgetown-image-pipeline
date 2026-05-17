@@ -64,6 +64,19 @@ vips black /tmp/_check.avif 16 16 && rm /tmp/_check.avif
 Both lines should succeed. If the second fails with "cannot encode AVIF", the
 libheif AV1 encoder plugin (`libheif-plugin-aomenc` on Ubuntu) is missing.
 
+### CI: GitHub Actions
+
+See [`examples/github-actions-build.yml`](examples/github-actions-build.yml) for
+a minimal `ubuntu-latest` workflow. The important step is installing libvips +
+libheif **before** `setup-ruby`, otherwise `ruby-vips` fails to `dlopen`
+`vips.so.42` at require time and Bridgetown surfaces a misleading
+
+> Dependency Error: Hmm, it looks like you don't have
+> `bridgetown-image-pipeline' or one of its dependencies installed.
+
+even though `bundle install` succeeds and `bundle show bridgetown-image-pipeline`
+finds the gem.
+
 ### Activate the plugin
 
 In `config/initializers.rb`:
