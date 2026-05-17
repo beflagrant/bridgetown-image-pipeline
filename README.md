@@ -67,15 +67,24 @@ libheif AV1 encoder plugin (`libheif-plugin-aomenc` on Ubuntu) is missing.
 ### CI: GitHub Actions
 
 See [`examples/github-actions-build.yml`](examples/github-actions-build.yml) for
-a minimal `ubuntu-latest` workflow. The important step is installing libvips +
-libheif **before** `setup-ruby`, otherwise `ruby-vips` fails to `dlopen`
-`vips.so.42` at require time and Bridgetown surfaces a misleading
+a minimal `ubuntu-latest` workflow that covers both gotchas:
 
-> Dependency Error: Hmm, it looks like you don't have
-> `bridgetown-image-pipeline' or one of its dependencies installed.
+1. **Install libvips + libheif before `setup-ruby`.** Otherwise `ruby-vips`
+   fails to `dlopen` `vips.so.42` at require time and Bridgetown surfaces a
+   misleading
 
-even though `bundle install` succeeds and `bundle show bridgetown-image-pipeline`
-finds the gem.
+   > Dependency Error: Hmm, it looks like you don't have
+   > `bridgetown-image-pipeline' or one of its dependencies installed.
+
+   even though `bundle install` succeeds and `bundle show bridgetown-image-pipeline`
+   finds the gem.
+
+2. **Cache the derivatives across runs.** AVIF encoding is CPU-heavy — a
+   site with ~30+ source images can take 10+ minutes of cold CI time per
+   build. Caching `.bridgetown-cache/image_pipeline` (the content-addressed
+   manifest) and `output/_bridgetown/image_pipeline` (the encoded
+   derivatives) with `restore-keys` fallback lets unchanged images
+   short-circuit. Adding a single new image only re-encodes that image.
 
 ### Activate the plugin
 

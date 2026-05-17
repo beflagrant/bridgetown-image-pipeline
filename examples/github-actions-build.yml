@@ -48,5 +48,28 @@ jobs:
           ruby-version: "3.3"
           bundler-cache: true
 
+      # AVIF encoding is CPU-heavy. Without this cache, every CI run
+      # re-encodes every derivative — cold builds on ubuntu-latest can
+      # easily exceed 10 minutes for a site with ~30+ source images.
+      #
+      # Caching both the plugin's content-addressed manifest
+      # (.bridgetown-cache/image_pipeline) AND the generated derivatives
+      # under output/_bridgetown/image_pipeline lets unchanged images
+      # short-circuit straight through. The restore-keys fallback means
+      # adding a single image only re-encodes that image, not the world.
+      #
+      # Add any other inputs that affect plugin behaviour to the key
+      # (custom widths, quality settings configured outside initializers.rb,
+      # etc.) so cache busts when configuration changes.
+      - name: Cache image-pipeline derivatives
+        uses: actions/cache@v4
+        with:
+          path: |
+            .bridgetown-cache/image_pipeline
+            output/_bridgetown/image_pipeline
+          key: image-pipeline-${{ hashFiles('Gemfile.lock', 'config/initializers.rb', 'src/images/**') }}
+          restore-keys: |
+            image-pipeline-
+
       - name: Build
         run: bundle exec bridgetown build
