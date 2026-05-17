@@ -360,6 +360,78 @@ class InspectorTest < Minitest::Test
   end
 end
 
+require "bridgetown"
+require "bridgetown/image_pipeline/builder"
+
+class BuilderAutoRewriteHookTest < Minitest::Test
+  FakeResource = Struct.new(:site, :output, :output_ext)
+
+  class FakeSite
+    attr_reader :root_dir
+
+    def initialize(root_dir)
+      @root_dir = root_dir
+    end
+
+    def in_dest_dir
+      File.join(@root_dir, "output")
+    end
+  end
+
+  def setup
+    @tmp     = Dir.mktmpdir("image_pipeline_builder_hook")
+    @site    = FakeSite.new(@tmp)
+    @cfg     = Bridgetown::ImagePipeline::Config.from(auto_rewrite: true)
+    @builder = Bridgetown::ImagePipeline::Builder.allocate
+    @builder.instance_variable_set(:@site, @site)
+    @builder.instance_variable_set(:@config, @cfg)
+    @builder.instance_variable_set(:@manifest,
+                                   Bridgetown::ImagePipeline::Manifest.new(cache_dir: File.join(@tmp, "cache")))
+    @builder.manifest.put("src/images/known.jpg", {
+                            width: 1200, height: 600,
+                            variants: [
+                              { path: "/_bridgetown/image_pipeline/known-400.avif", width: 400, format: :avif },
+                              { path: "/_bridgetown/image_pipeline/known-400.webp",  width: 400,  format: :webp },
+                              { path: "/_bridgetown/image_pipeline/known-1200.avif", width: 1200, format: :avif },
+                              { path: "/_bridgetown/image_pipeline/known-1200.webp", width: 1200, format: :webp }
+                            ]
+                          }, cache_key: "k")
+  end
+
+  def teardown
+    FileUtils.remove_entry(@tmp)
+    Bridgetown::Hooks.instance_variable_get(:@registry)&.each_value do |hooks|
+      hooks.reject! { |h| h.reloadable == false }
+    end
+  end
+
+  def test_post_render_hook_rewrites_html_resource_output
+    @builder.register_auto_rewrite_hooks!
+    resource = FakeResource.new(@site, '<html><body><img src="/images/known.jpg" alt="x"></body></html>', ".html")
+    Bridgetown::Hooks.trigger(:resources, :post_render, resource)
+    assert_includes resource.output, "<picture>"
+    assert_includes resource.output, 'type="image/avif"'
+  end
+
+  def test_post_render_hook_skips_non_html_output
+    @builder.register_auto_rewrite_hooks!
+    resource = FakeResource.new(@site, "raw bytes", ".xml")
+    Bridgetown::Hooks.trigger(:resources, :post_render, resource)
+    assert_equal "raw bytes", resource.output
+  end
+
+  def test_post_render_hook_ignores_other_sites
+    @builder.register_auto_rewrite_hooks!
+    other_site = FakeSite.new(Dir.mktmpdir("other_site"))
+    html = '<html><body><img src="/images/known.jpg" alt="x"></body></html>'
+    resource = FakeResource.new(other_site, html, ".html")
+    Bridgetown::Hooks.trigger(:resources, :post_render, resource)
+    assert_equal html, resource.output
+  ensure
+    FileUtils.remove_entry(other_site.root_dir) if other_site
+  end
+end
+
 class BgImageSetTest < Minitest::Test
   def variants_full
     {

@@ -5,6 +5,7 @@ require "json"
 require_relative "config"
 require_relative "manifest"
 require_relative "processor"
+require_relative "inspector"
 
 module Bridgetown
   module ImagePipeline
@@ -30,6 +31,26 @@ module Bridgetown
       def build
         before(:site, :pre_render) { run }
         attach_to_site!
+        register_auto_rewrite_hooks! if @config.auto_rewrite
+      end
+
+      def register_auto_rewrite_hooks!
+        inspector = Inspector.new(manifest: @manifest, config: @config)
+        site_to_match = @site
+        rewriter = lambda do |obj|
+          return unless obj.site.equal?(site_to_match)
+          return unless html_output?(obj)
+
+          obj.output = inspector.rewrite(obj.output.to_s)
+        end
+        Bridgetown::Hooks.register_one(:resources,       :post_render, reloadable: false, &rewriter)
+        Bridgetown::Hooks.register_one(:generated_pages, :post_render, reloadable: false, &rewriter)
+      end
+
+      def html_output?(obj)
+        return false unless obj.respond_to?(:output_ext)
+
+        obj.output_ext.to_s.downcase == ".html"
       end
 
       def run
