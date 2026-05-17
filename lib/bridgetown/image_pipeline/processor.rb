@@ -31,9 +31,9 @@ module Bridgetown
         end
 
         {
-          width:    source_width,
-          height:   source_height,
-          variants: variants,
+          width: source_width,
+          height: source_height,
+          variants: variants
         }
       end
 
@@ -56,9 +56,9 @@ module Bridgetown
           .call(destination: absolute_path)
 
         {
-          path:   relative_path,
-          width:  target_width,
-          format: saver_format,
+          path: relative_path,
+          width: target_width,
+          format: saver_format
         }
       end
     end

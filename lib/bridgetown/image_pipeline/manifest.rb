@@ -23,6 +23,7 @@ module Bridgetown
       def fetch_cached(cache_key)
         path = cache_file(cache_key)
         return nil unless File.exist?(path)
+
         deep_symbolize(JSON.parse(File.read(path)))
       end
 
@@ -38,6 +39,7 @@ module Bridgetown
       def variants_by_width(src)
         entry = @by_src[src]
         return {} unless entry
+
         entry[:variants].each_with_object({}) do |v, out|
           (out[v[:width]] ||= {})[v[:format]] = v[:path]
         end
@@ -54,7 +56,7 @@ module Bridgetown
       end
 
       def public_src_for(source_path)
-        "/" + source_path.sub(%r{\Asrc/}, "")
+        "/#{source_path.sub(%r{\Asrc/}, "")}"
       end
 
       def deep_symbolize(obj)

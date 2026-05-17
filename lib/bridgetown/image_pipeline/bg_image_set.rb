@@ -39,6 +39,7 @@ module Bridgetown
 
       def nearest(variants, target)
         return target if variants.key?(target)
+
         widths = variants.keys.sort
         chosen = widths.min_by { |w| (w - target).abs }
         warn "[bridgetown-image-pipeline] bg_image_block: no #{target}w derivative; using #{chosen}w"

@@ -48,7 +48,7 @@ module Bridgetown
 
       def sources
         patterns = @config.source_globs.map { |g| File.join(@site.root_dir, g) }
-        excludes = @config.exclude.map     { |g| File.join(@site.root_dir, g) }
+        excludes = @config.exclude.map { |g| File.join(@site.root_dir, g) }
         patterns.flat_map { |p| Dir.glob(p) }
                 .reject { |abs| excludes.any? { |ex| File.fnmatch?(ex, abs, File::FNM_PATHNAME | File::FNM_EXTGLOB) } }
                 .uniq
@@ -88,10 +88,10 @@ module Bridgetown
 
       def config_fingerprint
         {
-          widths:     @config.widths,
-          formats:    @config.formats,
+          widths: @config.widths,
+          formats: @config.formats,
           output_dir: @config.output_dir,
-          quality:    @config.quality,
+          quality: @config.quality
         }
       end
 

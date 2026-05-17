@@ -1,8 +1,45 @@
 AllCops:
   TargetRubyVersion: 3.2
+  NewCops: disable
+  SuggestExtensions: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - "lib/bridgetown/image_pipeline/config.rb"
+
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - "test/**/*"
+
+Metrics/AbcSize:
+  Max: 35
+  Exclude:
+    - "test/**/*"
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Metrics/PerceivedComplexity:
+  Max: 12
+
+Metrics/ClassLength:
+  Exclude:
+    - "test/**/*"
+
+Layout/LineLength:
+  Max: 140
+  Exclude:
+    - "test/**/*"
+
+Metrics/ParameterLists:
+  Max: 6

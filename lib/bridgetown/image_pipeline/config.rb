@@ -8,16 +8,16 @@ module Bridgetown
       keyword_init: true
     ) do
       DEFAULTS = {
-        source_globs:    ["src/images/**/*.{jpg,jpeg,png}"],
-        exclude:         [],
-        widths:          [400, 600, 800, 1200, 1600],
-        formats:         [:avif, :webp],
-        output_dir:      "_bridgetown/image_pipeline",
-        quality:         { avif: 65, webp: 88, jpeg: 88 },
-        auto_rewrite:    false,
+        source_globs: ["src/images/**/*.{jpg,jpeg,png}"],
+        exclude: [],
+        widths: [400, 600, 800, 1200, 1600],
+        formats: %i[avif webp],
+        output_dir: "_bridgetown/image_pipeline",
+        quality: { avif: 65, webp: 88, jpeg: 88 },
+        auto_rewrite: false,
         fail_on_missing: false,
-        breakpoints:     { 640 => 400, 768 => 600, 1024 => 800, 1280 => 1200 },
-        default_width:   1600,
+        breakpoints: { 640 => 400, 768 => 600, 1024 => 800, 1280 => 1200 },
+        default_width: 1600
       }.freeze
 
       # Build a Config from initializer kwargs. Unknown keys raise.

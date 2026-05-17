@@ -12,6 +12,7 @@ module Bridgetown
 
       def rewrite(html)
         return html unless @config.auto_rewrite
+
         doc = Nokogiri::HTML5.parse(html)
         Inspector.find_imgs(doc).each { |img| process_img(img, doc) }
         doc.to_html
@@ -28,6 +29,7 @@ module Bridgetown
       def process_img(img, doc)
         return if img.parent && img.parent.name == "picture"
         return if img.has_attribute?("data-no-pipeline")
+
         entry = @manifest.find_by_src(img["src"])
         return unless entry
 
@@ -38,6 +40,7 @@ module Bridgetown
         @config.formats.each do |fmt|
           variants = entry[:variants].select { |v| v[:format] == fmt }
           next if variants.empty?
+
           source = Nokogiri::XML::Node.new("source", doc)
           source["type"]   = "image/#{fmt}"
           source["srcset"] = variants.map { |v| "#{v[:path]} #{v[:width]}w" }.join(", ")
@@ -57,11 +60,12 @@ module Bridgetown
 
       def ensure_img_srcset(img, entry)
         return if img["srcset"]
-        fallback = entry[:variants].reject { |v| v[:format] == :avif || v[:format] == :webp }
+
+        fallback = entry[:variants].reject { |v| %i[avif webp].include?(v[:format]) }
         return if fallback.empty?
 
         img["srcset"] = fallback.map { |v| "#{v[:path]} #{v[:width]}w" }.join(", ")
-        img["sizes"]  ||= "100vw"
+        img["sizes"] ||= "100vw"
         smallest = fallback.min_by { |v| v[:width] }
         img["src"] = smallest[:path] if smallest
       end

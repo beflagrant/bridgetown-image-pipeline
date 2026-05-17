@@ -38,11 +38,11 @@ module Bridgetown
         end
 
         css = BgImageSet.css(
-          class_name:      class_name,
-          variants:        variants,
-          breakpoints:     @config.breakpoints,
-          default_width:   @config.default_width,
-          breakpoint_only: breakpoint_only,
+          class_name: class_name,
+          variants: variants,
+          breakpoints: @config.breakpoints,
+          default_width: @config.default_width,
+          breakpoint_only: breakpoint_only
         )
         "<style>#{css}</style>"
       end
@@ -53,6 +53,7 @@ module Bridgetown
         @config.formats.map do |fmt|
           variants = entry[:variants].select { |v| v[:format] == fmt }
           next nil if variants.empty?
+
           srcset = variants.map { |v| "#{v[:path]} #{v[:width]}w" }.join(", ")
           attrs = { type: "image/#{fmt}", srcset: srcset }
           attrs[:sizes] = sizes if sizes
@@ -66,30 +67,29 @@ module Bridgetown
         srcset = fallback_variants.map { |v| "#{v[:path]} #{v[:width]}w" }.join(", ")
 
         merged = {
-          src:    default ? default[:path] : src,
+          src: default ? default[:path] : src,
           srcset: srcset.empty? ? nil : srcset,
-          sizes:  sizes,
-          width:  entry[:width],
+          sizes: sizes,
+          width: entry[:width],
           height: entry[:height],
-          alt:    alt,
-          loading:       priority ? "eager" : "lazy",
-          decoding:      "async",
-          fetchpriority: priority ? "high" : nil,
+          alt: alt,
+          loading: priority ? "eager" : "lazy",
+          decoding: "async",
+          fetchpriority: priority ? "high" : nil
         }.merge(attrs)
 
         "<img #{render_attrs(merged)}>"
       end
 
       def fallback_img(src, alt:, sizes:, priority:, attrs:)
-        if @config.fail_on_missing
-          raise MissingSourceError, "image not in pipeline manifest: #{src}"
-        end
+        raise MissingSourceError, "image not in pipeline manifest: #{src}" if @config.fail_on_missing
+
         warn "[bridgetown-image-pipeline] no manifest entry for #{src}; rendering plain <img>"
         merged = {
           src: src, alt: alt, sizes: sizes,
           loading: priority ? "eager" : "lazy",
           decoding: "async",
-          fetchpriority: priority ? "high" : nil,
+          fetchpriority: priority ? "high" : nil
         }.merge(attrs)
         "<img #{render_attrs(merged)}>"
       end
