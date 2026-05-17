@@ -12,14 +12,15 @@ module Bridgetown
     class Builder < Bridgetown::Builder
       attr_reader :manifest, :config
 
-      # Bridgetown calls .new(site) on builders registered via Bridgetown.initializer.
-      # Config is passed in by the initializer via a class-level attribute.
+      # Bridgetown 2.x calls .new(name, site) on registered builders; earlier
+      # docs assumed .new(site). Accept either calling convention.
       class << self
         attr_accessor :pending_config
       end
 
-      def initialize(site, cache_root: nil)
-        super(site)
+      def initialize(*args, cache_root: nil)
+        site = args.last
+        super(*args)
         @site        = site
         @config      = self.class.pending_config || Config.from
         cache_root ||= File.join(site.root_dir, ".bridgetown-cache", "image_pipeline")
@@ -29,7 +30,7 @@ module Bridgetown
       end
 
       def build
-        before(:site, :pre_render) { run }
+        hook(:site, :pre_render) { run }
         attach_to_site!
         register_auto_rewrite_hooks! if @config.auto_rewrite
       end
