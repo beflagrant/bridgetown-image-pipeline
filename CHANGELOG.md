@@ -6,6 +6,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-19
+
+### Fixed
+
+- Processor no longer emits a duplicate fallback variant when the source
+  image's format already matches one of the configured `formats`. With
+  `formats: [:webp]` and a `.webp` source, each width was generating two
+  identical variants and the rendered `<picture>` `<source srcset>` had
+  double entries per width (#9).
+
+### Internal
+
+- Added `.bridgetown-cache/` to `.gitignore` so it stops showing up in
+  plugin-repo working trees when the plugin is exercised from a host
+  site checkout.
+
 ## [0.1.0] - 2026-05-15
 
 Initial release. Extracted from
