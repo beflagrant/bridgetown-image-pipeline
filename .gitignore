@@ -1,4 +1,5 @@
 /.bundle/
+/.bridgetown-cache/
 /.yardoc
 /_yardoc/
 /coverage/

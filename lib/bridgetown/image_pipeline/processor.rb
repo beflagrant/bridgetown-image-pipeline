@@ -17,6 +17,7 @@ module Bridgetown
         source_height = image.height
         original_ext  = File.extname(source_path).downcase.delete(".")
         original_ext  = "jpg" if original_ext == "jpeg"
+        original_fmt  = original_ext.to_sym
 
         variants = []
 
@@ -27,7 +28,14 @@ module Bridgetown
             variants << build_variant(source_path, basename, target_width, fmt)
           end
 
-          variants << build_variant(source_path, basename, target_width, original_ext.to_sym)
+          # Generate a fallback variant in the source's own format so the
+          # <img src> always has something to point at, but skip it when
+          # the configured formats already cover the source format —
+          # otherwise variants ends up with duplicates (e.g. webp source
+          # with formats=[:webp] would emit each width twice).
+          next if @config.formats.include?(original_fmt)
+
+          variants << build_variant(source_path, basename, target_width, original_fmt)
         end
 
         {
