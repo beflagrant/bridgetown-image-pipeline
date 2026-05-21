@@ -144,6 +144,19 @@ class ProcessorTest < Minitest::Test
     assert_equal 2000, result[:width]
     assert_equal 1000, result[:height]
   end
+
+  def test_does_not_duplicate_when_source_format_matches_configured_format
+    webp_src = File.expand_path("fixtures/test-image.webp", __dir__)
+    processor = Bridgetown::ImagePipeline::Processor.new(config: @cfg, output_root: @tmp)
+    result = processor.process(webp_src, basename: "test-image")
+
+    # @cfg defaults to formats: [:webp]; the source is also webp.
+    # Each width should yield exactly one variant, not two.
+    width_counts = result[:variants].group_by { |v| v[:width] }.transform_values(&:size)
+    width_counts.each do |width, count|
+      assert_equal 1, count, "expected one variant at width #{width}, got #{count}"
+    end
+  end
 end
 
 class HelperTest < Minitest::Test
