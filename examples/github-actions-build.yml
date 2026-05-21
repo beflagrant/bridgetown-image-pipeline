@@ -1,0 +1,75 @@
+# Minimal GitHub Actions workflow for a Bridgetown site that uses
+# bridgetown-image-pipeline. Pulled from a real-world adoption — see
+# https://github.com/beflagrant/flagrant-website/blob/main/.github/workflows/preview.yml
+#
+# Key thing this example exists to show: the plugin loads ruby-vips at
+# require time, and ruby-vips dlopens `vips.so.42`. Ubuntu runners do not
+# ship libvips by default. Skipping the apt-get step manifests on the
+# Bridgetown side as the misleading error:
+#
+#   Dependency Error: Hmm, it looks like you don't have
+#   `bridgetown-image-pipeline' or one of its dependencies installed.
+#
+# even though `bundle install` and `bundle show bridgetown-image-pipeline`
+# both report the gem present.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Install libvips + libheif so ruby-vips can dlopen vips.so.42 and so
+      # libvips can encode AVIF. The aomenc plugin is the AV1 encoder; the
+      # libde265 plugin is the HEVC decoder libheif uses internally.
+      - name: Install libvips and libheif
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libvips libvips-tools \
+            libheif1 libheif-dev libheif-plugin-aomenc libheif-plugin-libde265
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      # AVIF encoding is CPU-heavy. Without this cache, every CI run
+      # re-encodes every derivative — cold builds on ubuntu-latest can
+      # easily exceed 10 minutes for a site with ~30+ source images.
+      #
+      # Caching both the plugin's content-addressed manifest
+      # (.bridgetown-cache/image_pipeline) AND the generated derivatives
+      # under output/_bridgetown/image_pipeline lets unchanged images
+      # short-circuit straight through. The restore-keys fallback means
+      # adding a single image only re-encodes that image, not the world.
+      #
+      # Add any other inputs that affect plugin behaviour to the key
+      # (custom widths, quality settings configured outside initializers.rb,
+      # etc.) so cache busts when configuration changes.
+      - name: Cache image-pipeline derivatives
+        uses: actions/cache@v4
+        with:
+          path: |
+            .bridgetown-cache/image_pipeline
+            output/_bridgetown/image_pipeline
+          key: image-pipeline-${{ hashFiles('Gemfile.lock', 'config/initializers.rb', 'src/images/**') }}
+          restore-keys: |
+            image-pipeline-
+
+      - name: Build
+        run: bundle exec bridgetown build
