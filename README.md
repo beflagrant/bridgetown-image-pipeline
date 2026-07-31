@@ -62,6 +62,18 @@ configuration, and activation options.
 - [`docs/adr/`](docs/adr/) — architecture decision records
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — development setup, tests, releases
 
+## Alternative options
+
+- [**Jim**](https://github.com/surrim/jim) — Image processing for Jekyll
+  *and* Bridgetown. Uses RMagick + Inkscape (vs. libvips here) for broader
+  format coverage (100+ formats, watermarks, SVG inlining/forwarding) at the
+  cost of slower builds. Exposes a Liquid filter chain and ERB builder API
+  (vs. the `picture_tag` / `bg_image_block` helpers here), so the call site
+  configures formats, widths, and filename patterns per-image rather than
+  globally. Pick Jim if you need Jekyll support, watermarks, or non-AVIF/WebP
+  outputs; pick `bridgetown-image-pipeline` if you want a libvips-backed
+  AVIF+WebP pipeline with global config and minimal per-call boilerplate.
+
 ## License
 
 MIT — see [`LICENSE.txt`](LICENSE.txt).
